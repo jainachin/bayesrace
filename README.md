@@ -3,7 +3,7 @@ Learning-based control for autonomous racing
 
 ## About
 BayesRace focuses on two problems in autonomous racing:
-1. Computing the racing lines using Bayesian optimization (BayesOpt). Check out paper on arXiv and see [examples](https://github.com/jainachin/bayesrace#examples).
+1. Computing the racing lines using Bayesian optimization (BayesOpt). Check out paper on [arXiv](https://arxiv.org/pdf/2002.04794.pdf) and see [examples](https://github.com/jainachin/bayesrace#examples).
 2. Self-learning controller that minimizes the effort required for system identification. Paper and code will be released soon.
 
 
