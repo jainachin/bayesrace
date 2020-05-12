@@ -3,9 +3,30 @@ Learning-based control for autonomous racing
 
 ## About
 BayesRace focuses on two problems in autonomous racing:
-1. Computing the racing lines using Bayesian optimization (BayesOpt). Check out paper on [arXiv](https://arxiv.org/pdf/2002.04794.pdf) and see [examples](https://github.com/jainachin/bayesrace#examples).
-2. Self-learning controller that minimizes the effort required for system identification. Paper and code will be released soon.
 
+1. Computing the racing lines using Bayesian optimization (BayesOpt). Code [examples](https://github.com/jainachin/bayesrace#examples) below. [PDF](https://arxiv.org/pdf/2002.04794.pdf)
+	<details>
+	<summary>Cite this work</summary>
+	<pre>
+	@Article{JainRaceOpt2020,
+	author   = {Jain, Achin and Morari, Manfred},
+	journal  = {arXiv preprint arXiv:2002.04794},
+	title    = {{Computing the racing line using Bayesian optimization}},
+	year     = {2020},
+	}</pre>
+	</details>
+
+2. Self-learning controller that reduces the effort required for system identification. Code will be released soon. [PDF](https://arxiv.org/pdf/2005.04755.pdf)
+	<details>
+	<summary>Cite this work</summary>
+	<pre>
+	@Article{JainBayesRace2020,
+	author   = {Jain, Achin and Chaudhari, Pratik and Morari, Manfred},
+	journal  = {arXiv preprint arXiv:2005.04755},
+	title    = {{BayesRace: Learning to race autonomously using prior experience}},
+	year     = {2020},
+	}</pre>
+	</details>
 
 ## Installation
 We recommend creating a new [conda](https://docs.conda.io/en/latest/) environment:
