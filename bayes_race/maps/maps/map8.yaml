@@ -1,0 +1,6 @@
+image: map8.pgm
+resolution: 0.050000
+origin: [-47.466360259483366,-49.13899596999351, 0.000000]
+negate: 0
+occupied_thresh: 0.45
+free_thresh: 0.196

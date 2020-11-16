@@ -49,37 +49,27 @@ class Track:
 		theta_track = np.cumsum(np.linalg.norm(diff, 2, axis=0))
 		self.theta_track = np.concatenate([np.array([0]), theta_track])
 
-	def _load_raceline(self, wx, wy, n_samples, v=None):
+	def _load_raceline(self, wx, wy, n_samples, v=None, t=None):
 		"""	load raceline and fit cubic splines
 		"""
-		x, y = self._fit_cubic_splines(
-			wx=wx, 
-			wy=wy, 
-			n_samples=n_samples
-			)
-		theta = np.cumsum(np.linalg.norm(np.diff(np.array([x,y])), 2, axis=0))
-		theta = np.concatenate([np.array([0]), theta])
+		# x, y, theta = self._fit_cubic_splines(
+		# 	wx=wx, 
+		# 	wy=wy, 
+		# 	n_samples=n_samples
+		# 	)
+		# theta = np.cumsum(np.linalg.norm(np.diff(np.array([x,y])), 2, axis=0))
+		# theta = np.concatenate([np.array([0]), theta])
+		self.spline = Spline2D(wx, wy)
+		x, y = wx, wy
+		theta = self.spline.s
+
 		self.x_raceline = np.array(x)
 		self.y_raceline = np.array(y)
 		self.raceline = np.array([x, y])
 
-		dy = np.diff(np.array(y + [y[0]]))
-		dx = np.diff(np.array(x + [x[0]]))
-		psi = np.arctan(dy/dx)
-		for idr in range(1,psi.shape[0]):
-			if psi[idr]-psi[idr-1]>1:
-				psi[idr:] = psi[idr:] - np.pi
-			if psi[idr]-psi[idr-1]<-1:
-				psi[idr:] = psi[idr:] + np.pi
-		self.psi_raceline = psi
-		# plt.figure()
-		# plt.plot(psi)
-		# plt.show()
-		# import pdb; pdb.set_trace()
-		self.spline_psi = Spline(theta, psi)
-
 		if v is not None:
 			self.v_raceline = v
+			self.t_raceline = t
 			self.spline_v = Spline(theta, v)
 		
 	def _fit_cubic_splines(self, wx, wy, n_samples):
@@ -87,16 +77,15 @@ class Track:
 		"""
 		sp = Spline2D(wx, wy)
 		self.spline = sp
-		raceline = np.concatenate([[wx],[wy]])
-		raceline_length = self._calc_raceline_length(raceline)
-		s = np.arange(0, sp.s[-1], raceline_length/n_samples)
-		# s = np.linspace(0, sp.s[-1], n_samples)
+		# raceline = np.concatenate([[wx],[wy]])
+		# raceline_length = self._calc_raceline_length(raceline)
+		s = np.linspace(0, sp.s[-1]-0.001, n_samples)
 		x, y = [], []
 		for i_s in s:
 			ix, iy = sp.calc_position(i_s)
 			x.append(ix)
 			y.append(iy)
-		return x, y
+		return x, y, s
 
 	def _param2xy(self, theta):
 		"""	finds (x,y) coordinate on center line for a given theta
@@ -141,6 +130,21 @@ class Track:
 		optidx = np.argmin(dist)
 		if optidx == n_waypoints-1:
 			optidx = -1
+		optxy = proj[:,optidx]
+		return optxy, optidx
+
+	def project_fast(self, x, y, raceline):
+		"""	finds projection for (x,y) on a raceline
+		"""
+		point = [(x, y)]
+		n_waypoints = raceline.shape[1]
+
+		proj = np.empty([2,n_waypoints-1])
+		dist = np.empty([n_waypoints-1])
+		for idl in range(n_waypoints-1):
+			line = [raceline[:,idl], raceline[:,idl+1]]
+			proj[:,idl], dist[idl] = Projection(point, line)
+		optidx = np.argmin(dist)
 		optxy = proj[:,optidx]
 		return optxy, optidx
 

@@ -6,11 +6,12 @@ __email__ = 'achinj@seas.upenn.edu'
 
 
 import numpy as np
+import matplotlib.pyplot as plt
+
 from bayes_race.utils import Spline2D
-from bayes_race.tracks import ETHZ, ETHZMobil, UCB
+from bayes_race.tracks import MAP2
 from bayes_race.params import ORCA, F110
 from bayes_race.raceline import calcMinimumTime
-import matplotlib.pyplot as plt
 
 
 class randomTrajectory:
@@ -82,25 +83,16 @@ if __name__ == '__main__':
 	"""	example how to use
 	"""
 
-	# choose track 'ETHZ'/'ETHZMobil'/'UCB'
-	TRACK_NAME = 'UCB'
+	TRACK_NAME = 'MAP2'
+	SCALE = 0.90
 
 	# choose vehicle params and specify indices of the nodes
-	if TRACK_NAME is 'ETHZ':
-		params = ORCA()
-		track = ETHZ()
-		NODES = [33, 67, 116, 166, 203, 239, 274, 309, 344, 362, 382, 407, 434, 448, 470, 514, 550, 586, 622, 657, 665]
+	params = F110()
+	track = MAP2()
+	NODES = [5, 15, 25, 35, 45, 55, 65, 75, 85, 95, 105, 115, 5]
+	LASTIDX = 1
 
-	elif TRACK_NAME is 'ETHZMobil':
-		params = ORCA()
-		track = ETHZMobil()
-		NODES = [7, 21, 37, 52, 66, 81, 97, 111, 136, 160, 175, 191, 205, 220, 236, 250, 275, 299, 337, 376]
-	
-	elif TRACK_NAME is 'UCB':
-		params = F110()
-		track = UCB()
-		NODES = [10, 32, 44, 67, 83, 100, 113, 127, 144, 160, 175, 191]
-
+	print(track.x_raceline.shape)
 	# find cooresponding distance in path coordinates
 	theta = track.theta_track[NODES]
 	n_waypoints = len(theta)
@@ -110,14 +102,13 @@ if __name__ == '__main__':
 		track=track,
 		n_waypoints=n_waypoints,
 		)
-	width_random = rand_traj.sample_nodes(scale=0.95)
+	width_random = rand_traj.sample_nodes(scale=SCALE)
 
 	# find corresponding x,y coordinates
 	# here we choose terminal point to be the first point to prevent crashing before finishing
-	# mainly because ETHZ tracks have a corner at the end
 	wx_random, wy_random = rand_traj.calculate_xy(
 		width_random,
-		last_index=NODES[0],
+		last_index=NODES[LASTIDX],
 		theta=theta,
 		)
 

@@ -13,10 +13,11 @@ import time
 import numpy as np
 import cvxpy as cv
 from scipy.integrate import ode, odeint
+import matplotlib.pyplot as plt
+
 from bayes_race.utils import odeintRK6
 from bayes_race.params import ORCA, F110
 from bayes_race.tracks import ETHZ, ETHZMobil, UCB
-import matplotlib.pyplot as plt
 
 
 def define_params(mass, lf, lr):
@@ -155,6 +156,16 @@ def friction_circle(Fmax):
     y = Fmax*np.sin(t)
     return x, y
 
+def get_time_vec(b, theta):
+    num_wpts = theta.size
+    dtheta = 1/(num_wpts-1)
+    bsqrt = np.sqrt(b)
+    dt = 2*dtheta/(bsqrt[0:num_wpts-1]+bsqrt[1:num_wpts])
+    t = np.zeros([num_wpts])
+    for j in range(1, num_wpts):
+        t[j] = t[j-1] + dt[j-1]
+    return t
+
 def simulate(b, a, u, path, params, plot_results, print_updates, int_method ='rk6'):
     """ integrate using ode solver
     """
@@ -172,13 +183,7 @@ def simulate(b, a, u, path, params, plot_results, print_updates, int_method ='rk
     # vx[0], vy[0] = S_prime[0,0], S_prime[1,0]
 
     # calculate time for each index
-    bsqrt = np.sqrt(b)
-    dt = 2*dtheta/(bsqrt[0:num_wpts-1]+bsqrt[1:num_wpts])
-    t = np.zeros([num_wpts])
-    for j in range(1, num_wpts):
-        t[j] = t[j-1] + dt[j-1]
-    if print_updates:
-        print('The optimal time to traverse is {:.4f}s'.format(t[-1]))
+    t = get_time_vec(b, theta)
 
     # integrate
     if int_method == 'odeint':
@@ -215,7 +220,7 @@ def simulate(b, a, u, path, params, plot_results, print_updates, int_method ='rk
     if plot_results:
         plots(t, x, y, vxy, u, S, params)
     
-    return vxy, np.sum(dt)
+    return vxy, t[-1]
 
 def optimize(path, params, plot_results, print_updates):
     """ main function to solve convex optimization
@@ -268,24 +273,31 @@ def solve(x, y, mass, lf, lr, plot_results=False, print_updates=False, **kwargs)
         plot_results=plot_results, 
         print_updates=print_updates,
         )
-    return x, y, vopt, topt, U
+    return x, y, vopt, topt, U, B
 
 def calcMinimumTime(x, y, **kwargs):
     """ wrapper function to return minimum time only
     """
-    x, y, vopt, topt, U = solve(x, y, **kwargs)
+    x, y, vopt, topt, U, B = solve(x, y, **kwargs)
     return topt
 
 def calcMinimumTimeSpeed(x, y, **kwargs):
     """ wrapper function to return minimum time and speed profile only
     """
-    x, y, vopt, topt, U = solve(x, y, **kwargs)
+    x, y, vopt, topt, U, B = solve(x, y, **kwargs)
     return topt, vopt
+
+def calcMinimumTimeSpeedInputs(x, y, **kwargs):
+    """ wrapper function to return minimum time and speed profile only
+    """
+    x, y, vopt, topt, U, B = solve(x, y, **kwargs)
+    path = define_path(x, y)
+    return get_time_vec(B, path['theta']), vopt, U
 
 def calcInputs(x, y, **kwargs):
     """ wrapper function to return control inputs only
     """
-    x, y, vopt, topt, U = solve(x, y, **kwargs)
+    x, y, vopt, topt, U, B = solve(x, y, **kwargs)
     return U   
 
 
